@@ -1,16 +1,33 @@
-# React + Vite
+🌡️ App de Previsão do Tempo
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Aplicação frontend desenvolvida em React para consulta de previsão do tempo, exibindo temperatura, umidade e gráficos interativos com dados de forecast.
 
-Currently, two official plugins are available:
+🚀 Tecnologias Utilizadas
+React
+JavaScript (ES6+)
+Tailwind CSS
+Recharts
+API de clima (ex: OpenWeather)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+📊 Funcionalidades
+🔎 Busca de cidade
+🌡️ Exibição de temperatura atual
+💧 Gráfico de umidade
+📈 Gráficos interativos de previsão
+🎨 Interface moderna com efeito glassmorphism
+📱 Layout responsivo
 
-## React Compiler
+🖥️ Demonstração
+weathernow-elivelton.netlify.app
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+📂 Estrutura do Projeto
+src/
+ ├── components/
+ ├── services/
+ ├── App.jsx
+ └── main.jsx
 
-## Expanding the ESLint configuration
+ 👨‍💻 Autor
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+Desenvolvido por Elivelton Almeida
+🔗 LinkedIn: https://linkedin.com/in/eliveltonalmeida
