@@ -325,6 +325,11 @@ export default function App() {
                     </div>
                 </div>
             )}
+
+            {/* Footer */}
+            <footer className="text-center mt-12 py-6 text-xs text-gray-500 border-t border-gray-200">
+                Desenvolvido por <span className="font-semibold">Elivelton Almeida</span> © {new Date().getFullYear()}
+            </footer>
         </div>
     );
 }
