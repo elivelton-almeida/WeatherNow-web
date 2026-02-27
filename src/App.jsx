@@ -1,6 +1,19 @@
 import { useState, useEffect } from "react";
 
 import {
+    Droplets,
+    Wind,
+    Cloud,
+    CloudRain,
+    CloudSnow,
+    Gauge,
+    Thermometer,
+    Sunrise,
+    Sunset,
+    TrendingUp
+} from "lucide-react";
+
+import {
     ResponsiveContainer,
     LineChart,
     Line,
@@ -121,33 +134,89 @@ export default function App() {
         setLoading(false);
     }
 
-    // Mini-cards
-    const weatherCards = weather
-        ? [
-            { label: "Umidade", value: `${weather.humidity}%`, icon: "💧" },
-            { label: "Vento", value: `${weather.windSpeed} m/s, ${weather.windDeg}°`, icon: "🌬" },
-            { label: "Nuvens", value: `${weather.cloudiness}%`, icon: "☁" },
-            weather.rain1h !== null && { label: "Chuva 1h", value: `${weather.rain1h} mm`, icon: "🌧" },
-            weather.rain3h !== null && { label: "Chuva 3h", value: `${weather.rain3h} mm`, icon: "🌧" },
-            weather.snow1h !== null && { label: "Neve 1h", value: `${weather.snow1h} mm`, icon: "❄" },
-            weather.snow3h !== null && { label: "Neve 3h", value: `${weather.snow3h} mm`, icon: "❄" },
-            { label: "Pressão", value: `${weather.pressure} hPa`, icon: "🔽" },
-            { label: "Sensação", value: `${weather.feelsLike?.toFixed(1)}°C`, icon: "🌡" },
-            { label: "Min/Max", value: `${weather.tempMin?.toFixed(1)}°C / ${weather.tempMax?.toFixed(1)}°C`, icon: "⛅" },
-            { label: "Nascer do Sol", value: new Date(weather.sunrise * 1000).toLocaleTimeString(), icon: "🌅" },
-            { label: "Pôr do Sol", value: new Date(weather.sunset * 1000).toLocaleTimeString(), icon: "🌇" },
-        ].filter(Boolean)
-        : [];
-
-    // Dados para os Gráficos
+    // Dados Forecast
     const forecastData = forecast.map(f => ({
-        time: new Date(f.dt * 1000).toLocaleString(undefined, { hour: '2-digit', day: '2-digit' }),
+        time: `${String(new Date(f.dt * 1000).getHours()).padStart(2, '0')}h`,
         temperature: f.temperature,
         humidity: f.humidity,
         wind: f.windSpeed,
         clouds: f.cloudiness,
-        rain: f.rain3h || 0
+        rain: f.rain3h || 0,
+        icon: f.icon
     }));
+
+    // Dados Mini-cards
+    const weatherCards = weather
+        ? [
+            { label: "Umidade", value: `${weather.humidity}%`, icon: <Droplets size={22} /> },
+
+            {
+                label: "Vento",
+                value: `${weather.windSpeed} m/s`,
+                icon: <Wind size={22} />
+            },
+
+            {
+                label: "Nuvens",
+                value: `${weather.cloudiness}%`,
+                icon: <Cloud size={22} />
+            },
+
+            weather.rain1h !== null && {
+                label: "Chuva 1h",
+                value: `${weather.rain1h} mm`,
+                icon: <CloudRain size={22} />
+            },
+
+            weather.rain3h !== null && {
+                label: "Chuva 3h",
+                value: `${weather.rain3h} mm`,
+                icon: <CloudRain size={22} />
+            },
+
+            weather.snow1h !== null && {
+                label: "Neve 1h",
+                value: `${weather.snow1h} mm`,
+                icon: <CloudSnow size={22} />
+            },
+
+            weather.snow3h !== null && {
+                label: "Neve 3h",
+                value: `${weather.snow3h} mm`,
+                icon: <CloudSnow size={22} />
+            },
+
+            {
+                label: "Pressão",
+                value: `${weather.pressure} hPa`,
+                icon: <Gauge size={22} />
+            },
+
+            {
+                label: "Sensação",
+                value: `${weather.feelsLike?.toFixed(1)}°C`,
+                icon: <Thermometer size={22} />
+            },
+
+            {
+                label: "Min/Max",
+                value: `${weather.tempMin?.toFixed(1)}° / ${weather.tempMax?.toFixed(1)}°`,
+                icon: <TrendingUp size={22} />
+            },
+
+            {
+                label: "Nascer do Sol",
+                value: new Date(weather.sunrise * 1000).toLocaleTimeString(),
+                icon: <Sunrise size={22} />
+            },
+
+            {
+                label: "Pôr do Sol",
+                value: new Date(weather.sunset * 1000).toLocaleTimeString(),
+                icon: <Sunset size={22} />
+            },
+        ].filter(Boolean)
+        : [];
 
     return (
         <div
@@ -159,31 +228,53 @@ export default function App() {
             </div>
 
             {/* Card principal */}
-            <div className="relative z-10 bg-white/80 backdrop-blur-xl p-6 rounded-3xl shadow-2xl w-[90%] max-w-md text-center transform transition duration-500 hover:scale-105">
-                <h1 className="text-3xl font-bold mb-4 text-gray-800">🌦 WeatherNow</h1>
-                <div className="flex gap-2 mb-4">
+            <div className="relative z-10 
+  bg-white/10 backdrop-blur-2xl 
+  border border-white/20 
+  p-6 rounded-3xl 
+  shadow-[0_25px_60px_rgba(0,0,0,0.35)] 
+  w-[92%] max-w-md text-white">
+
+                {/* Header */}
+                <div className="flex justify-between items-center mb-4">
+                    <h2 className="text-lg font-medium">
+                        {weather?.city || "Buscar cidade"}
+                    </h2>
+                    <span className="opacity-60">⋯</span>
+                </div>
+
+                {/* Busca */}
+                <div className="flex gap-2 mb-3">
                     <input
                         type="text"
                         placeholder="Digite a cidade"
-                        className="flex-1 p-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
+                        className="flex-1 p-3 rounded-xl 
+      bg-white/20 text-white 
+      placeholder-white/70 
+      border border-white/20 
+      focus:outline-none focus:ring-2 focus:ring-white/40"
                         value={city}
                         onChange={(e) => setCity(e.target.value)}
                     />
                     <button
                         onClick={() => getWeather()}
-                        className="bg-blue-500 hover:bg-blue-600 text-white px-5 rounded-xl transition duration-300"
+                        className="bg-white/20 hover:bg-white/30 px-4 rounded-xl transition"
                     >
                         Buscar
                     </button>
                 </div>
 
+                {/* Histórico */}
                 {getHistory().length > 0 && (
-                    <div className="flex gap-2 flex-wrap mt-2">
+                    <div className="mb-4 flex gap-2 overflow-x-auto pb-2">
                         {getHistory().map((c, idx) => (
                             <button
                                 key={idx}
-                                className="bg-gray-200 px-3 py-1 rounded hover:bg-gray-300 font-semibold"
                                 onClick={() => getWeather(c)}
+                                className="px-3 py-1 text-sm 
+          bg-white/15 hover:bg-white/25 
+          border border-white/20 
+          rounded-full whitespace-nowrap transition"
                             >
                                 {c}
                             </button>
@@ -191,27 +282,65 @@ export default function App() {
                     </div>
                 )}
 
-                {loading && (
-                    <div className="flex justify-center mt-4">
-                        <div className="w-6 h-6 border-4 border-blue-400 border-t-transparent rounded-full animate-spin"></div>
-                    </div>
-                )}
-
-                {error && <p className="text-red-500 mt-3">{error}</p>}
-
                 {weather && (
-                    <div className="mt-4 animate-fadeIn">
-                        <h2 className="text-2xl font-semibold">{weather.city}</h2>
-                        <div className="flex justify-center items-center gap-4 mt-2">
+                    <>
+                        {/* Temperatura Principal */}
+                        <div className="flex flex-col items-center justify-center mt-4 text-center">
                             <img
-                                src={`https://openweathermap.org/img/wn/${weather.icon}@2x.png`}
+                                src={`https://openweathermap.org/img/wn/${weather.icon}@4x.png`}
                                 alt={weather.description}
-                                className="w-16 h-16"
+                                className="w-24 h-24 drop-shadow-xl"
                             />
-                            <p className="text-5xl font-bold">{weather.temperature.toFixed(1)}°C</p>
+
+                            <div className="text-6xl font-light leading-none">
+                                {weather.temperature.toFixed(0)}°
+                                <span className="text-2xl align-top">C</span>
+                            </div>
+
+                            <div className="text-sm opacity-80 mt-1 capitalize">
+                                {weather.description}
+                            </div>
                         </div>
-                        <p className="mt-1 text-lg capitalize">{weather.description}</p>
-                    </div>
+
+                        {/* Forecast Horizontal (próximas horas) */}
+                        {forecastData.length > 0 && (
+                            <div className="mt-6">
+                                <div className="flex gap-3 overflow-x-auto pb-2">
+                                    {forecastData.slice(0, 8).map((item, idx) => (
+                                        <div
+                                            key={idx}
+                                            className="min-w-[80px] 
+                bg-white/15 
+                border border-white/20 
+                rounded-2xl 
+                p-3 text-center 
+                backdrop-blur-md"
+                                        >
+                                            <div className="text-xs mb-2 opacity-70">
+                                                {item.time}
+                                            </div>
+
+                                            <div className="text-2xl mb-1">
+                                                {item.icon ? (
+                                                    <img
+                                                        src={`https://openweathermap.org/img/wn/${item.icon}@2x.png`}
+                                                        alt=""
+                                                        className="w-8 h-8 mx-auto"
+                                                    />
+                                                ) : (
+                                                    "☁️"
+                                                )}
+                                            </div>
+
+                                            <div className="text-sm font-medium">
+                                                {item.temperature.toFixed(0)}°
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                    </>
                 )}
             </div>
 
@@ -234,7 +363,10 @@ export default function App() {
             {/* Precipitação */}
             {weather && (
                 <div className="bg-white/80 backdrop-blur-xl p-4 rounded-2xl shadow-lg mt-6 w-[90%] max-w-4xl">
-                    <h3 className="font-semibold mb-2">🌧 Precipitação (mm)</h3>
+                    <h3 className="flex items-center gap-2 font-semibold mb-3 text-gray-700">
+                        <CloudRain size={18} />
+                        Precipitação (mm)
+                    </h3>
                     <ResponsiveContainer width="100%" height={200}>
                         <BarChart data={precipitationData}>
                             <XAxis dataKey="name" />
@@ -251,12 +383,15 @@ export default function App() {
             {forecastData.length > 0 && (
                 <div className="relative z-10 mt-8 w-[90%] max-w-5xl space-y-6">
                     <h2 className="text-xl font-semibold text-center mb-2 text-white drop-shadow-lg">
-                        Previsão 5 Dias
+                        Forecasting
                     </h2>
 
                     {/* Temperatura */}
                     <div className="bg-white/80 backdrop-blur-xl p-4 rounded-2xl shadow-lg">
-                        <h3 className="font-semibold mb-2">🌡 Temperatura (°C)</h3>
+                        <h3 className="flex items-center gap-2 font-semibold mb-3 text-gray-700">
+                            <Thermometer size={18} />
+                            Temperatura (°C)
+                        </h3>
                         <ResponsiveContainer width="100%" height={200}>
                             <LineChart data={forecastData}>
                                 <XAxis dataKey="time" tick={{ fontSize: 12 }} />
@@ -270,7 +405,10 @@ export default function App() {
 
                     {/* Chuva */}
                     <div className="bg-white/80 backdrop-blur-xl p-4 rounded-2xl shadow-lg">
-                        <h3 className="font-semibold mb-2">🌧 Chuva (mm)</h3>
+                        <h3 className="flex items-center gap-2 font-semibold mb-3 text-gray-700">
+                            <CloudRain size={18} />
+                            Chuva (mm)
+                        </h3>
                         <ResponsiveContainer width="100%" height={200}>
                             <BarChart data={forecastData}>
                                 <XAxis dataKey="time" tick={{ fontSize: 12 }} />
@@ -284,7 +422,10 @@ export default function App() {
 
                     {/* Vento */}
                     <div className="bg-white/80 backdrop-blur-xl p-4 rounded-2xl shadow-lg">
-                        <h3 className="font-semibold mb-2">🌬 Vento (m/s)</h3>
+                        <h3 className="flex items-center gap-2 font-semibold mb-3 text-gray-700">
+                            <Wind size={18} />
+                            Vento (m/s)
+                        </h3>
                         <ResponsiveContainer width="100%" height={200}>
                             <LineChart data={forecastData}>
                                 <XAxis dataKey="time" tick={{ fontSize: 12 }} />
@@ -298,7 +439,10 @@ export default function App() {
 
                     {/* Nuvens */}
                     <div className="bg-white/80 backdrop-blur-xl p-4 rounded-2xl shadow-lg">
-                        <h3 className="font-semibold mb-2">☁ Nuvens (%)</h3>
+                        <h3 className="flex items-center gap-2 font-semibold mb-3 text-gray-700">
+                            <Cloud size={18} />
+                            Nuvens (%)
+                        </h3>
                         <ResponsiveContainer width="100%" height={200}>
                             <LineChart data={forecastData}>
                                 <XAxis dataKey="time" tick={{ fontSize: 12 }} />
@@ -312,7 +456,10 @@ export default function App() {
 
                     {/* Umidade */}
                     <div className="bg-white/80 backdrop-blur-xl p-4 rounded-2xl shadow-lg">
-                        <h3 className="font-semibold mb-2">💧 Umidade (%)</h3>
+                        <h3 className="flex items-center gap-2 font-semibold mb-3 text-gray-700">
+                            <Droplets size={18} />
+                            Umidade (%)
+                        </h3>
                         <ResponsiveContainer width="100%" height={200}>
                             <LineChart data={forecastData}>
                                 <XAxis dataKey="time" tick={{ fontSize: 12 }} />
