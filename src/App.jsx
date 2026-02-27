@@ -27,7 +27,7 @@ import {
 
 import WeatherAnimation from "./WeatherAnimation";
 
-const API_BASE = "https://weathernow-api-crhf.onrender.com";
+const API_BASE = "https://weathernow-api-crhf.onrender.com"; // backend API hospedado com o Render
 const API_BASE_LOCAL = "http://localhost:5268"; //para testes com o backend local
 
 export default function App() {
@@ -35,6 +35,7 @@ export default function App() {
     const [weather, setWeather] = useState(null);
     const [forecast, setForecast] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [loadingMessage, setLoadingMessage] = useState("");
     const [error, setError] = useState("");
 
     const precipitationData = weather
@@ -103,23 +104,38 @@ export default function App() {
 
     // Busca clima atual
     async function getWeather(cityName) {
+        if (loading) return;
+
         const query = cityName || city;
         if (!query) return;
 
         setLoading(true);
+        setLoadingMessage("Buscando, aguarde...");
         setError("");
         setWeather(null);
         setForecast([]);
 
+        // Detecta possível cold start do Render
+        const coldStartTimer = setTimeout(() => {
+            setLoadingMessage("Iniciando API no Docker...");
+        }, 4000);
+
         try {
             // Clima atual
-            const resWeather = await fetch(`${API_BASE}/api/weather/${encodeURIComponent(query)}`);
+            const resWeather = await fetch(
+                `${API_BASE}/api/weather/${encodeURIComponent(query)}`
+            );
+
             if (!resWeather.ok) throw new Error();
+
             const dataWeather = await resWeather.json();
             setWeather(dataWeather);
 
             // Previsão 5 dias
-            const resForecast = await fetch(`${API_BASE}/api/weather/forecast/${encodeURIComponent(query)}`);
+            const resForecast = await fetch(
+                `${API_BASE}/api/weather/forecast/${encodeURIComponent(query)}`
+            );
+
             if (resForecast.ok) {
                 const dataForecast = await resForecast.json();
                 setForecast(dataForecast.list);
@@ -127,23 +143,38 @@ export default function App() {
 
             saveSearch(query);
             setCity(query);
-        } catch {
-            setError("Cidade não encontrada.");
-        }
 
-        setLoading(false);
+        } catch (err) {
+            setError("Cidade não encontrada.");
+        } finally {
+            clearTimeout(coldStartTimer);
+            setLoading(false);
+            setLoadingMessage("");
+        }
     }
 
     // Dados Forecast
-    const forecastData = forecast.map(f => ({
-        time: `${String(new Date(f.dt * 1000).getHours()).padStart(2, '0')}h`,
-        temperature: f.temperature,
-        humidity: f.humidity,
-        wind: f.windSpeed,
-        clouds: f.cloudiness,
-        rain: f.rain3h || 0,
-        icon: f.icon
-    }));
+    const forecastData = forecast.map(f => {
+        const date = new Date(f.dt * 1000);
+
+        const day = date
+            .toLocaleDateString("pt-BR", { weekday: "short" })
+            .replace(".", "");
+
+        const hour = `${String(date.getHours()).padStart(2, "0")}h`;
+
+        return {
+            time: `${day} ${hour}`, // mantém para gráficos
+            day,                    // usa no card
+            hour,                   // usa no card
+            temperature: f.temperature,
+            humidity: f.humidity,
+            wind: f.windSpeed,
+            clouds: f.cloudiness,
+            rain: f.rain3h || 0,
+            icon: f.icon
+        };
+    });
 
     // Dados Mini-cards
     const weatherCards = weather
@@ -235,6 +266,14 @@ export default function App() {
   shadow-[0_25px_60px_rgba(0,0,0,0.35)] 
   w-[92%] max-w-md text-white">
 
+                {/* App Title */}
+                <div className="flex items-center justify-center gap-2 mb-6">
+                    <span className="text-3xl drop-shadow-lg">☁️</span>
+                    <h1 className="text-2xl font-light tracking-wider">
+                        Weather<span className="font-semibold">Now</span>
+                    </h1>
+                </div>
+
                 {/* Header */}
                 <div className="flex justify-between items-center mb-4">
                     <h2 className="text-lg font-medium">
@@ -258,9 +297,10 @@ export default function App() {
                     />
                     <button
                         onClick={() => getWeather()}
-                        className="bg-white/20 hover:bg-white/30 px-4 rounded-xl transition"
+                        disabled={loading}
+                        className="bg-white/20 hover:bg-white/30 px-4 rounded-xl transition disabled:opacity-50"
                     >
-                        Buscar
+                        {loading ? "Buscando..." : "Buscar"}
                     </button>
                 </div>
 
@@ -271,14 +311,26 @@ export default function App() {
                             <button
                                 key={idx}
                                 onClick={() => getWeather(c)}
+                                disabled={loading}
                                 className="px-3 py-1 text-sm 
-          bg-white/15 hover:bg-white/25 
-          border border-white/20 
-          rounded-full whitespace-nowrap transition"
+        bg-white/15 hover:bg-white/25 
+        border border-white/20 
+        rounded-full whitespace-nowrap transition
+        disabled:opacity-40 disabled:cursor-not-allowed"
                             >
                                 {c}
                             </button>
                         ))}
+                    </div>
+                )}
+
+                {loading && (
+                    <div className="flex flex-col items-center justify-center mt-8 space-y-4">
+                        <div className="w-12 h-12 border-4 border-white/30 border-t-white rounded-full animate-spin"></div>
+
+                        <div className="text-sm opacity-80 animate-pulse text-center px-4">
+                            {loadingMessage}
+                        </div>
                     </div>
                 )}
 
